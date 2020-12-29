@@ -32,7 +32,7 @@ def checkConnection(func):
         if not canConnect:
             return {
                "ret_code": 1,
-               'result': u'无法连接:  %s:%s'%(str(NacosHostIP, NacosHostPort))
+               'result': u'无法连接:  %s:%s'%(str(NacosHostIP), str(NacosHostPort))
             }
         return func(*args, **kwargs)
     return wrapper
