@@ -64,11 +64,11 @@ def sendHttpRequest(host='127.0.0.1', port=9200, url='/', method='GET', body={},
             "result": str(e)
         }
 
-
+@checkConnection
 def get_namespaces():
     return sendHttpRequest(host=NacosHostIP, port=NacosHostPort, url='/nacos/v1/console/namespaces')
 
-
+@checkConnection
 def get_namespace(namespace=None):
     if not namespace:
         return {
@@ -90,7 +90,7 @@ def get_namespace(namespace=None):
             }
     return {'ret_code': 0, 'result': None}
 
-
+@checkConnection
 def create_namespace(namespace=None, namespaceID=''):
     if not namespace or not isinstance(namespace, str):
         return {
@@ -151,7 +151,7 @@ def publish_config(tenant='bigdata', dataid=None, group='DEFAULT_GROUP', content
                                 body=TmpDict, header=headers)
     return TmpResult
 
-
+@checkConnection
 def get_config(tenant='bigdata', dataid=None, group='DEFAULT_GROUP'):
     if not dataid:
         return {
