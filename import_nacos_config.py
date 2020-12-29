@@ -23,7 +23,7 @@ def checkConnection(func):
         for itime in range(RetryTimes):
            try:
                TmpHttpObj=httplib.HTTPConnection(NacosHostIP, NacosHostPort ,timeout=ConnectionTimeOut)
-               TmpHttpObj.request(url='nacos')
+               TmpHttpObj.request(url='nacos', method='GET')
                canConnect = True
                break
            except Exception as e:
@@ -186,4 +186,5 @@ if __name__ == "__main__":
                     if TmpResult['ret_code'] != 0:
                         print (str(TmpResult))
                         sys.exit(1)
+            break
 
