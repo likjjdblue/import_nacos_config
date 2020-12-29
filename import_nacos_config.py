@@ -182,5 +182,8 @@ if __name__ == "__main__":
             for filename in c:
                 with open(os.path.join(a, filename)) as f:
                     print (u'导入 %s' % (filename,))
-                    publish_config(dataid=filename, content=f.read())
+                    TmpResult = publish_config(dataid=filename, content=f.read())
+                    if TmpResult['ret_code'] != 0:
+                        print (str(TmpResult))
+                        os.exit(1)
 
