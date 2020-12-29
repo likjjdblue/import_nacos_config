@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-import json, httplib, urllib, os
+import json, httplib, urllib, os, sys
 
 NacosHostIP = os.environ.get('NacosHostIP', '192.168.24.22')
 NacosHostPort = os.environ.get('NacosHostPort', 59494)
@@ -185,5 +185,5 @@ if __name__ == "__main__":
                     TmpResult = publish_config(dataid=filename, content=f.read())
                     if TmpResult['ret_code'] != 0:
                         print (str(TmpResult))
-                        os.exit(1)
+                        sys.exit(1)
 
