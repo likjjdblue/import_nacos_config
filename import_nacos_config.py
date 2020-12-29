@@ -3,15 +3,11 @@
 
 import json, httplib, urllib, os
 
-NacosHostIP = '192.168.24.22'
-NacosHostPort = 59494
-NacosUsername = 'nacos'
-NacosUserPassword = 'nacos'
+NacosHostIP = os.environ.get('NacosHostIP', '192.168.24.22')
+NacosHostPort = os.environ.get('NacosHostPort', 59494)
+NacosUserName = os.environ.get('NacosUserName', 'nacos')
+NacosUserPassword = os.environ.get('NacosUserPassword', 'nacos')
 
-TmpDict = {
-    "username": "nacos",
-    "password": "nacos",
-}
 headers = {
     "Content-type": "application/x-www-form-urlencoded",
 }
@@ -90,7 +86,7 @@ def create_namespace(namespace=None, namespaceID=''):
         }
 
     TmpDict = {
-        'username': NacosUsername,
+        'username': NacosUserName,
         'password': NacosUserPassword,
         'namespaceName': namespace,
         'customNamespaceId': namespaceID,
@@ -116,7 +112,7 @@ def publish_config(tenant='bigdata', dataid=None, group='DEFAULT_GROUP', content
     TmpNamespaceInfo = get_namespace(tenant)
 
     TmpDict = {
-        'username': NacosUsername,
+        'username': NacosUserName,
         'password': NacosUserPassword,
         'tenant': TmpNamespaceInfo['result']['namespace'],
         'dataId': dataid,
@@ -142,7 +138,7 @@ def get_config(tenant='bigdata', dataid=None, group='DEFAULT_GROUP'):
         return {"ret_code": 0, "result": None}
 
     TmpDict = {
-        'username': NacosUsername,
+        'username': NacosUserName,
         'password': NacosUserPassword,
         'dataId': dataid,
         'tenant': TmpNamespaceInfo['result']['namespace'],
