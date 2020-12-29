@@ -22,7 +22,8 @@ def checkConnection(func):
         canConnect=False
         for itime in range(RetryTimes):
            try:
-               httplib.HTTPConnection(NacosHostIP, NacosHostPort ,timeout=ConnectionTimeOut)
+               TmpHttpObj=httplib.HTTPConnection(NacosHostIP, NacosHostPort ,timeout=ConnectionTimeOut)
+               TmpHttpObj.request(url='nacos')
                canConnect = True
                break
            except Exception as e:
