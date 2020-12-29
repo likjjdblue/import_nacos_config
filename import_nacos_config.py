@@ -7,10 +7,35 @@ NacosHostIP = os.environ.get('NacosHostIP', '192.168.24.22')
 NacosHostPort = os.environ.get('NacosHostPort', 59494)
 NacosUserName = os.environ.get('NacosUserName', 'nacos')
 NacosUserPassword = os.environ.get('NacosUserPassword', 'nacos')
+RetryInterval=int(os.environ.get('RetryInterval', 5))
+RetryTimes=int(os.environ.get('RetryTimes', 10))
+ConnectionTimeOut=int(os.environ.get('ConnectionTimeOut', 10))
+
+
 
 headers = {
     "Content-type": "application/x-www-form-urlencoded",
 }
+
+def checkConnection(func):
+    def wrapper(*args, **kwargs):
+        canConnect=False
+        for itime in range(RetryTimes):
+           try:
+               httplib.HTTPConnection(NacosHostIP, NacosHostPort ,timeout=ConnectionTimeOut)
+               canConnect = True
+               break
+           except Exception as e:
+               pass
+
+        if not canConnect:
+            return {
+               "ret_code": 1,
+               'result': u'无法连接:  %s:%s'%(str(NacosHostIP, NacosHostPort))
+            }
+        return func(*args, **kwargs)
+    return wrapper
+
 
 
 def sendHttpRequest(host='127.0.0.1', port=9200, url='/', method='GET', body={}, header={}, timeout=5):
@@ -96,7 +121,7 @@ def create_namespace(namespace=None, namespaceID=''):
     return sendHttpRequest(host=NacosHostIP, port=NacosHostPort, method='POST', url='/nacos/v1/console/namespaces',
                            body=TmpDict, header=headers)
 
-
+@checkConnection
 def publish_config(tenant='bigdata', dataid=None, group='DEFAULT_GROUP', content='', type='text'):
     if not dataid:
         return {
