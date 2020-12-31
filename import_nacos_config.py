@@ -91,7 +91,7 @@ def get_namespace(namespace=None):
     return {'ret_code': 0, 'result': None}
 
 @checkConnection
-def create_namespace(namespace=None, namespaceID=''):
+def create_namespace(namespace=None, namespaceID='6c0b3e50-8629-411a-a0ed-a270f327e8cd'):
     if not namespace or not isinstance(namespace, str):
         return {
             'ret_code': 1,
