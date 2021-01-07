@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json, httplib, urllib, os, sys
+import subprocess, re
 
 NacosHostIP = os.environ.get('NacosHostIP', '192.168.24.22')
 NacosHostPort = os.environ.get('NacosHostPort', 59494)
@@ -11,7 +12,6 @@ RetryInterval=int(os.environ.get('RetryInterval', 5))
 RetryTimes=int(os.environ.get('RetryTimes', 10))
 ConnectionTimeOut=int(os.environ.get('ConnectionTimeOut', 10))
 DataDIR=os.environ.get('DataDIR', 'DATA/')
-DefaultGroup=os.environ.get('DefaultGroup', 'bigdata')
 
 
 
@@ -125,7 +125,7 @@ def create_namespace(namespace=None, namespaceID='6c0b3e50-8629-411a-a0ed-a270f3
                            body=TmpDict, header=headers)
 
 @checkConnection
-def publish_config(tenant='bigdata', dataid=None, group='DEFAULT_GROUP', content='', type='text'):
+def publish_config(tenant='wcm', dataid=None, group='DEFAULT_GROUP', content='', type='text'):
     if not dataid:
         return {
             'ret_code': 1,
@@ -154,7 +154,7 @@ def publish_config(tenant='bigdata', dataid=None, group='DEFAULT_GROUP', content
     return TmpResult
 
 @checkConnection
-def get_config(tenant='bigdata', dataid=None, group='DEFAULT_GROUP'):
+def get_config(tenant='wcm', dataid=None, group='DEFAULT_GROUP'):
     if not dataid:
         return {
             'ret_code': 1,
@@ -179,19 +179,43 @@ def get_config(tenant='bigdata', dataid=None, group='DEFAULT_GROUP'):
 
 
 if __name__ == "__main__":
-    for a, b, c in os.walk(DataDIR):
-        if a == DataDIR:
-            for filename in c:
-                TmpFileExtension = filename.split('.')[1]
-                if TmpFileExtension not in ['yaml', 'yml', 'properties']:
-                    print ('Skipping: %s'%(filename,))
-                    continue
+    if not os.path.isfile(os.path.join(DataDIR, 'namespace.txt')):
+        print ('ERROR; namespace file not exits: '+str(os.path.join(DataDIR, 'namespace.txt')))
+        exit(1)
+    with open(os.path.join(DataDIR, 'namespace.txt'),mode='r') as f:
+        for line in f:
+            line = line.strip()
+            TmpList = line.split()
+            if len(TmpList) != 2:
+                continue
 
-                with open(os.path.join(a, filename)) as f:
-                    print (u'导入 %s' % (filename,))
-                    TmpResult = publish_config(dataid=filename, content=f.read(), group=DefaultGroup)
-                    if TmpResult['ret_code'] != 0:
-                        print (str(TmpResult))
-                        sys.exit(1)
-            break
+            TmpNamespace = TmpList[0]
+            TmpID = TmpList[1]
+            create_namespace(namespace=TmpNamespace, namespaceID=TmpID)
+
+    TmpDataDIR = os.path.normpath(DataDIR) + os.sep
+    if not os.path.isdir(DataDIR):
+        print ('ERROR; namespace file not exits: ' + str(DataDIR))
+        exit(1)
+
+    RawInfo = subprocess.Popen("find %s -mindepth 2 -maxdepth 2 -type f"%(TmpDataDIR,),shell=True,
+                               stdout=subprocess.PIPE).communicate()[0]
+    for filepath in re.findall(r'(.*?)\n', RawInfo, flags=re.MULTILINE|re.DOTALL|re.UNICODE):
+        TmpFileExtension = filepath.split('.')[1]
+        if TmpFileExtension not in ['yaml', 'yml', 'properties']:
+            print ('Skipping: %s'%(filepath,))
+            continue
+        TmpFilename = filepath.lstrip(TmpDataDIR)
+        if TmpFilename.count(os.sep) == 1:
+            TmpGroupName = TmpFilename.split(os.sep)[0]
+            print ('filename: '+str(filepath))
+            print ('group name: '+str(TmpGroupName))
+            with open(filepath) as f:
+                print (u'导入 %s' % (filepath,))
+                TmpResult = publish_config(dataid=filepath.split('/')[-1], content=f.read(), tenant=TmpGroupName)
+                print (TmpResult)
+                if TmpResult['ret_code'] != 0:
+                    print (str(TmpResult))
+                    sys.exit(1)
+
 
