@@ -10,6 +10,8 @@ NacosUserPassword = os.environ.get('NacosUserPassword', 'nacos')
 RetryInterval=int(os.environ.get('RetryInterval', 5))
 RetryTimes=int(os.environ.get('RetryTimes', 10))
 ConnectionTimeOut=int(os.environ.get('ConnectionTimeOut', 10))
+DataDIR=os.environ.get('DataDIR', 'DATA/')
+DefaultGroup=os.environ.get('DefaultGroup', 'bigdata')
 
 
 
@@ -177,12 +179,17 @@ def get_config(tenant='bigdata', dataid=None, group='DEFAULT_GROUP'):
 
 
 if __name__ == "__main__":
-    for a, b, c in os.walk('DEFAULT_GROUP'):
-        if a == 'DEFAULT_GROUP':
+    for a, b, c in os.walk(DataDIR):
+        if a == DataDIR:
             for filename in c:
+                TmpFileExtension = filename.split('.')[1]
+                if TmpFileExtension not in ['yaml', 'yml', 'properties']:
+                    print ('Skipping: %s'%(filename,))
+                    continue
+
                 with open(os.path.join(a, filename)) as f:
                     print (u'导入 %s' % (filename,))
-                    TmpResult = publish_config(dataid=filename, content=f.read())
+                    TmpResult = publish_config(dataid=filename, content=f.read(), group=DefaultGroup)
                     if TmpResult['ret_code'] != 0:
                         print (str(TmpResult))
                         sys.exit(1)
