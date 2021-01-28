@@ -198,7 +198,7 @@ if __name__ == "__main__":
         print ('ERROR; namespace file not exits: ' + str(DataDIR))
         exit(1)
 
-    RawInfo = subprocess.Popen("find %s -mindepth 2 -maxdepth 2 -type f"%(TmpDataDIR,),shell=True,
+    RawInfo = subprocess.Popen("find %s -mindepth 3 -maxdepth 3 -type f"%(TmpDataDIR,),shell=True,
                                stdout=subprocess.PIPE).communicate()[0]
     for filepath in re.findall(r'(.*?)\n', RawInfo, flags=re.MULTILINE|re.DOTALL|re.UNICODE):
         TmpFileExtension = filepath.split('.')[1]
@@ -213,6 +213,21 @@ if __name__ == "__main__":
             with open(filepath) as f:
                 print (u'导入 %s' % (filepath,))
                 TmpResult = publish_config(dataid=filepath.split('/')[-1], content=f.read(), tenant=TmpGroupName)
+                print (TmpResult)
+                if TmpResult['ret_code'] != 0:
+                    print (str(TmpResult))
+                    sys.exit(1)
+        elif TmpFilename.count(os.sep) == 2:
+            TmpTenantName = TmpFilename.split(os.sep)[0]
+            TmpFilename = TmpFilename.lstrip(TmpTenantName+'/')
+            TmpGroupName = TmpFilename.split(os.sep)[0]
+
+            print ('filename: '+str(filepath))
+            print ('tenant name: %s'%(TmpTenantName,))
+            print ('group name: '+str(TmpGroupName))
+            with open(filepath) as f:
+                print (u'导入 %s' % (filepath,))
+                TmpResult = publish_config(dataid=filepath.split('/')[-1], content=f.read(), tenant=TmpTenantName, group=TmpGroupName)
                 print (TmpResult)
                 if TmpResult['ret_code'] != 0:
                     print (str(TmpResult))
