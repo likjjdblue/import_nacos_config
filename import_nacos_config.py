@@ -226,7 +226,7 @@ if __name__ == "__main__":
             print ('tenant name: %s'%(TmpTenantName,))
             print ('group name: '+str(TmpGroupName))
             with open(filepath) as f:
-                print (u'导入 %s' % (filepath,))
+                print (u'load %s' % (filepath,))
                 TmpResult = publish_config(dataid=filepath.split('/')[-1], content=f.read(), tenant=TmpTenantName, group=TmpGroupName)
                 print (TmpResult)
                 if TmpResult['ret_code'] != 0:
